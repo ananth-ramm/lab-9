@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Socket.IO Chat</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    #messages { border: 1px solid #ccc; padding: 10px; height: 300px; overflow-y: auto; }
+    #online { margin-bottom: 10px; }
+    .typing { color: gray; font-style: italic; }
+  </style>
+</head>
+<body>
+
+<h2>Socket.IO Chat</h2>
+
+<div>
+  <strong>Online:</strong>
+  <span id="online"></span>
+</div>
+
+<div id="messages"></div>
+<p class="typing" id="typing"></p>
+
+<br>
+
+<input id="nickname" placeholder="Enter nickname" />
+<button onclick="setNickname()">Set</button>
+
+<br><br>
+
+<input id="message" placeholder="Type message..." autocomplete="off" />
+<button onclick="sendMessage()">Send</button>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+
+  const messages = document.getElementById("messages");
+  const online = document.getElementById("online");
+  const typing = document.getElementById("typing");
+
+  function setNickname() {
+    const nick = document.getElementById("nickname").value;
+    socket.emit("set nickname", nick);
+  }
+
+  function sendMessage() {
+    const msg = document.getElementById("message").value;
+
+    if (msg.trim() === "") return;
+
+    socket.emit("chat message", msg);
+    document.getElementById("message").value = "";
+  }
+
+  document.getElementById("message").addEventListener("input", () => {
+    socket.emit("typing");
+  });
+
+  socket.on("chat message", (msg) => {
+    const div = document.createElement("div");
+    div.textContent = msg;
+    messages.appendChild(div);
+    typing.textContent = "";
+  });
+
+  socket.on("self message", (msg) => {
+    const div = document.createElement("div");
+    div.textContent = "You: " + msg;
+    div.style.fontWeight = "bold";
+    messages.appendChild(div);
+  });
+
+  socket.on("typing", (msg) => {
+    typing.textContent = msg;
+    setTimeout(() => (typing.textContent = ""), 1500);
+  });
+
+  socket.on("online-users", (list) => {
+    online.textContent = list.join(", ");
+  });
+</script>
+
+</body>
+</html>

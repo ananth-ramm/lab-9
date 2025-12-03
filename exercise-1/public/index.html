@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>MVC Calculator</title>
+</head>
+<body>
+  <h1>MVC Calculator</h1>
+
+  <input id="a" type="number" placeholder="Number A" />
+  <input id="b" type="number" placeholder="Number B" />
+
+  <select id="op">
+    <option value="add">Add</option>
+    <option value="subtract">Subtract</option>
+    <option value="multiply">Multiply</option>
+    <option value="divide">Divide</option>
+  </select>
+
+  <button onclick="calculate()">Calculate</button>
+
+  <h2 id="result"></h2>
+
+  <script>
+    async function calculate() {
+      const a = document.getElementById("a").value;
+      const b = document.getElementById("b").value;
+      const op = document.getElementById("op").value;
+
+      const response = await fetch(`/api/calculator/${op}?a=${a}&b=${b}`);
+      const data = await response.json();
+
+      document.getElementById("result").innerText =
+        data.error ? data.error : "Result: " + data.result;
+    }
+  </script>
+</body>
+</html>
